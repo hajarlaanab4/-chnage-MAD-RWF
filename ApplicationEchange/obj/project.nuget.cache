@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "crL2gYV/XGw=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\laana\\ApplicationEchange\\ApplicationEchange\\ApplicationEchange.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\laana\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.7\\microsoft.aspnetcore.openapi.9.0.7.nupkg.sha512",
+    "C:\\Users\\laana\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

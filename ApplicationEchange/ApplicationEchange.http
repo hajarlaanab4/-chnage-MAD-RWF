@@ -1,0 +1,6 @@
+@ApplicationEchange_HostAddress = http://localhost:5229
+
+GET {{ApplicationEchange_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
