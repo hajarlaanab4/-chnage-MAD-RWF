@@ -1,25 +1,65 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { DollarSign, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { DollarSign, Mail, Lock, User, ArrowRight, Phone, MapPin } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { API_BASE_URL } from "../config/api";
+import { COUNTRIES } from "../config/countries";
 
 export function RegisterScreen() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     if (password !== confirmPassword) {
-      alert("Les mots de passe ne correspondent pas");
+      setError("Les mots de passe ne correspondent pas");
       return;
     }
-    // Mock registration
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: name,
+          email,
+          password,
+          phone,
+          country,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data?.message ?? "Échec de l'inscription");
+        return;
+      }
+
+      localStorage.setItem("currentUser", JSON.stringify(data));
+    } catch {
+      setError("Impossible de contacter le serveur");
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+
     navigate("/dashboard");
   };
 
@@ -48,6 +88,12 @@ export function RegisterScreen() {
 
           {/* Formulaire */}
           <form onSubmit={handleRegister} className="space-y-4">
+            {error && (
+              <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 px-4 py-3">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
+
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -85,6 +131,49 @@ export function RegisterScreen() {
                   className="pl-11 h-12 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   required
                 />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.38 }}
+            >
+              <Label htmlFor="phone" className="text-gray-700 dark:text-gray-300">Téléphone</Label>
+              <div className="relative mt-1.5">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+250 7XX XXX XXX"
+                  className="pl-11 h-12 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.39 }}
+            >
+              <Label htmlFor="country" className="text-gray-700 dark:text-gray-300">Pays</Label>
+              <div className="relative mt-1.5">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select
+                  id="country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  className="w-full pl-11 pr-3 h-12 rounded-xl border border-gray-300 bg-white text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                >
+                  <option value="">Sélectionner un pays</option>
+                  {COUNTRIES.map((countryOption) => (
+                    <option key={countryOption} value={countryOption}>
+                      {countryOption}
+                    </option>
+                  ))}
+                </select>
               </div>
             </motion.div>
 
@@ -136,9 +225,10 @@ export function RegisterScreen() {
             >
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl group"
               >
-                <span>Créer mon compte</span>
+                <span>{isLoading ? "Création..." : "Créer mon compte"}</span>
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>

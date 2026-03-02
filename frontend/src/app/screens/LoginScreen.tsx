@@ -5,16 +5,46 @@ import { DollarSign, Mail, Lock, ArrowRight } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { API_BASE_URL } from "../config/api";
 
 export function LoginScreen() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - dans une vraie app, cela vérifierait les credentials
-    navigate("/dashboard");
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data?.message ?? "Échec de connexion");
+        return;
+      }
+
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      navigate("/dashboard");
+    } catch {
+      setError("Impossible de contacter le serveur");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,6 +72,12 @@ export function LoginScreen() {
 
           {/* Formulaire */}
           <form onSubmit={handleLogin} className="space-y-5">
+            {error && (
+              <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 px-4 py-3">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
+
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -89,9 +125,10 @@ export function LoginScreen() {
             >
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl group"
               >
-                <span>Se connecter</span>
+                <span>{isLoading ? "Connexion..." : "Se connecter"}</span>
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>

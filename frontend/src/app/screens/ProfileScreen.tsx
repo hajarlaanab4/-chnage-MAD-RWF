@@ -18,13 +18,14 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { API_BASE_URL } from "../config/api";
+import { COUNTRIES } from "../config/countries";
 
 type UserProfile = {
   id: number;
   name: string;
   email: string;
   phone: string;
-  address: string;
+  country: string;
   memberSince: string;
 };
 
@@ -39,7 +40,7 @@ export function ProfileScreen() {
     name: "",
     email: "",
     phone: "",
-    address: "",
+    country: "",
     memberSince: "",
   });
   const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null);
@@ -82,7 +83,7 @@ export function ProfileScreen() {
           name: profile.name,
           email: profile.email,
           phone: profile.phone,
-          address: profile.address,
+          country: profile.country,
         }),
       });
 
@@ -282,23 +283,30 @@ export function ProfileScreen() {
                 )}
               </div>
 
-              {/* Adresse */}
+              {/* Pays */}
               <div>
                 <Label className="text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
-                  Adresse
+                  Pays
                 </Label>
                 {isEditing ? (
-                  <Input
-                    value={profile.address}
+                  <select
+                    value={profile.country}
                     onChange={(e) =>
-                      setProfile({ ...profile, address: e.target.value })
+                      setProfile({ ...profile, country: e.target.value })
                     }
-                    className="rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
+                    className="w-full px-3 h-10 rounded-xl border border-gray-300 bg-white text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="">Sélectionner un pays</option>
+                    {COUNTRIES.map((countryOption) => (
+                      <option key={countryOption} value={countryOption}>
+                        {countryOption}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
                   <p className="text-gray-900 dark:text-white font-medium px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                    {profile.address}
+                    {profile.country}
                   </p>
                 )}
               </div>
